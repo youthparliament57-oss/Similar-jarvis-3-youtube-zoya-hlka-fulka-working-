@@ -25,8 +25,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK Licenses
+        run: |
+          if command -v sdkmanager &> /dev/null; then
+            yes | sdkmanager --licenses || true
+          elif [ -n "$ANDROID_HOME" ] && [ -d "$ANDROID_HOME/cmdline-tools" ]; then
+            CMDLINE_BIN=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager | head -n 1)
+            if [ -n "$CMDLINE_BIN" ]; then
+              yes | "$CMDLINE_BIN" --licenses || true
+            fi
+          fi
 
       - name: Prepare .env configuration
         run: |
